@@ -45,6 +45,7 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
   }, [cover, avatar]);
   const onChangeAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.length !== 1) return;
+    
     if (avatar?.source) avatar.source.cancel();
     setErr("");
 
@@ -59,6 +60,7 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
     const formData = new FormData();
     formData.append("image", file);
     try {
+      setLoading(true)
       const res = await axios.post("/images", formData, {
         cancelToken: source.token,
         headers: {
@@ -79,10 +81,12 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
           path: res.data.path,
         };
       });
+      setLoading(false);
     } catch (error: any) {
       if (error?.response?.status === 401)
         return dispatch(authActions.setToken(null));
       setAvatar(undefined);
+      setLoading(false);
     }
   };
   const onChangeCover = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +105,7 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
     const formData = new FormData();
     formData.append("image", file);
     try {
+      setLoading(true)
       const res = await axios.post("/images", formData, {
         cancelToken: source.token,
         headers: {
@@ -121,12 +126,14 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
           path: res.data.path,
         };
       });
+      setLoading(false);
     } catch (error: any) {
  
       
       if (error?.response?.status === 401)
         return dispatch(authActions.setToken(null));
       setCover(undefined);
+      setLoading(false);
     }
   };
   const onSubmit = async (e: any) => {
