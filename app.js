@@ -1,4 +1,4 @@
-require('dotenv').config()
+require("dotenv").config();
 const path = require("path");
 
 const express = require("express");
@@ -17,8 +17,8 @@ const replyRoutes = require("./routes/reply");
 const likeRoutes = require("./routes/like");
 
 const { removeUnSubmitedFiles } = require("./util/scheduling");
- const MONGODB_URI =process.env.MONGODB_URI ;
- //mongodb://localhost:27017/twitter
+const MONGODB_URI = process.env.MONGODB_URI;
+//mongodb://localhost:27017/twitter
 
 // const rule = new schedule.RecurrenceRule();
 // rule.second = 0;
@@ -29,7 +29,7 @@ const app = express();
 app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "/client/build")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use((req, res, next) => {
@@ -48,10 +48,8 @@ app.use(tweetRoutes);
 app.use(replyRoutes);
 app.use(imageRoutes);
 app.use(likeRoutes);
-app.use(function (req, res, next) {
-  res.status(404).json({ message: "Not found." });
-});
-app.use(function (error, req, res, next) { 
+
+app.use(function (error, req, res, next) {
   console.log(error);
   if (!error.statusCode) {
     error.statusCode = 500;
@@ -61,22 +59,24 @@ app.use(function (error, req, res, next) {
   if (error.code === "LIMIT_FILE_SIZE") {
     error.statusCode = 400;
     error.message = "Max size for file must be at most 2mb.";
-  
   }
   const status = error.statusCode;
   const message = error.message;
-  
+
   res.status(status).json({ message: message, data: error.data });
 });
-
+app.get("*", (req, res) => {
+   
+  res.sendFile(path.join(__dirname, "/client/build",'index.html'));
+});
+app.use(function (req, res, next) {
+  res.status(404).json({ message: "Not found." });
+});
 mongoose
   .connect(MONGODB_URI)
   .then((result) => {
-    app.listen(8000);
+    app.listen(process.env.PORT || 8000);
   })
   .catch((err) => {
-
     console.log(err);
   });
-
-  

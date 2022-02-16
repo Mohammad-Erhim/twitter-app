@@ -4,12 +4,11 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "sass": "node-sass -w sass -o public/css",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
-    "heroku-postbuild": "cd client && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"" 
   },
   "author": "",
   "license": "ISC",
