@@ -8,8 +8,7 @@ exports.user = async (req, res, next) => {
   try {
     const user = await User.findById(userRef);
     
-    console.log(user,'sadasdsaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-    res.status(200).json({ user });
+     res.status(200).json({ user });
   } catch (err) {
     next(err);
   }

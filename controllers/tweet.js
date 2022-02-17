@@ -8,7 +8,7 @@ const { validateImageHelper } = require("../util/validateFile");
 const { userRefExist } = require("../util/dbRefCheck");
 const { Types } = require("mongoose");
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 15;
 
 exports.addTweet = async (req, res, next) => {
   const text = req.body.text;
@@ -46,7 +46,7 @@ exports.tweets = async (req, res, next) => {
   const page = +req.query.page || 1;
 
   const search = req.query.search || "";
-console.log(search);
+ 
   try {
     let tweets = await Tweet.aggregate([
       { $match: { text: { $regex: new RegExp(search) } } },
@@ -107,7 +107,7 @@ console.log(search);
         },
       },
     ]);
-console.log(tweets[0]);
+ 
     res.status(200).json({ tweets });
   } catch (err) {
     next(err);

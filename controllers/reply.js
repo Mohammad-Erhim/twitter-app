@@ -3,7 +3,7 @@ const Tweet = require("../models/tweet");
 const Reply = require("../models/reply");
 const { userRefExist } = require("../util/dbRefCheck");
 const { Types } = require("mongoose");
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 15;
 exports.replies = async (req, res, next) => {
   const tweetRef = req.params.tweetRef;
   const page = +req.query.page || 1;
