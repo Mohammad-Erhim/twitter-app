@@ -247,8 +247,9 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
           <button
             className={`btn ${
               progress ||
-              loading 
-             
+              loading ||
+             avatar?.path===undefined||
+             cover?.path===undefined
                 ? "disable-btn"
                 : ""
             }`}

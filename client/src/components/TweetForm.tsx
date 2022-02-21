@@ -234,7 +234,8 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
               
               loading ||
               !text.trim() ||
-              imgs.find((img) => img.percentCompleted !== 100)
+              imgs.find((img) => img.percentCompleted !== 100)||
+              imgs.find((img) => img.path === undefined)
                 ? "disable-btn"
                 : ""
             }`}
