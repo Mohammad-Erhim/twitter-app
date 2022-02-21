@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 
 const mongoose = require("mongoose");
 
-const schedule = require("node-schedule");
+ 
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
@@ -16,14 +16,9 @@ const replyRoutes = require("./routes/reply");
 
 const likeRoutes = require("./routes/like");
 
-const { removeUnSubmitedFiles } = require("./util/scheduling");
+ 
 const MONGODB_URI = process.env.MONGODB_URI;
-//mongodb://localhost:27017/twitter
-
-// const rule = new schedule.RecurrenceRule();
-// rule.second = 0;
-// // rule.hour = 1;
-// schedule.scheduleJob(rule, removeUnSubmitedFiles);
+ 
 const app = express();
 
 app.use(bodyParser.json());

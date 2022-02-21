@@ -141,7 +141,7 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
       <div
         style={{
           width: progress===100?0:progress+"vw",
-          height: "10px",
+          height: "2%",
           backgroundColor: "blue",
           position: "fixed",
           left: "0",
