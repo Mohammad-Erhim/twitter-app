@@ -53,7 +53,7 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
 
     if (file.size > 2000000) {
       setErr("Max size of image is 2mb.");
-      // return;
+      return;
     }
     const source = axios.CancelToken.source();
 
@@ -248,8 +248,8 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
             className={`btn ${
               progress ||
               loading ||
-             avatar?.path===undefined||
-             cover?.path===undefined
+             (avatar?.source&&avatar?.path===undefined)||
+            (cover?.source&& cover?.path===undefined)
                 ? "disable-btn"
                 : ""
             }`}
