@@ -2,10 +2,12 @@
 ## Demo [https://twitter-app-2018.herokuapp.com/](https://twitter-app-2018.herokuapp.com/)
 (email:`test@gmail.com`,passsword:`111111`)
 
+ 
 
-https://user-images.githubusercontent.com/75538560/155992179-4a70245b-f397-48cc-86b6-c91e9c03b834.mp4
+https://user-images.githubusercontent.com/75538560/155997494-d5b6547f-b4d9-4af0-a4af-4731238bc04e.mp4
 
 
+ 
 ## About
 twitter-app : it is an app built with React to emulate twitter web app .
 
