@@ -32,7 +32,7 @@ const TweetC: FC<{ tweet: Tweet }> = ({ tweet }) => {
    
     
       if (!profile) 
-        dispatch(getUserAction(tweet._id,source));
+        dispatch(getUserAction(tweet.userRef,source));
     
         return () => {
           source.cancel("Cancelling in cleanup");
