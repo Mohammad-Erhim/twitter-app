@@ -1,13 +1,13 @@
 import { FC, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { RootState, searchAction } from "../store";
- 
+import { RootState, appActions} from "../store";
+
 const SearchInput: FC = () => {
   const [focus, setFocus] = useState(false);
   const dispatch = useDispatch();
-  const search  = useSelector((state: RootState) => state.app).search;
-  const history=useHistory();
+  const search = useSelector((state: RootState) => state.app.search);
+  const history = useHistory();
   return (
     <div className={`search-input ${focus ? "focus" : ""}`}>
       <svg viewBox="0 0 24 24">
@@ -17,14 +17,13 @@ const SearchInput: FC = () => {
       </svg>{" "}
       <input
         value={search}
-        onChange={(e) => { 
-         
-            dispatch(searchAction.setSearch({search:e.target.value }));
-            history.location.pathname!=='/home'&&history.push('/home');
-          
+        onChange={(e) => {
+          dispatch(appActions.setSearch(e.target.value));
+          history.location.pathname !== "/home" && history.push("/home");
         }}
-        onFocus={() =>{ setFocus(true);
-         }}
+        onFocus={() => {
+          setFocus(true);
+        }}
         onBlur={() => setFocus(false)}
         type="text"
         placeholder="Search"

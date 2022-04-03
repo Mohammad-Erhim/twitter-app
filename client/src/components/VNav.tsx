@@ -161,7 +161,10 @@ const history=useHistory();
                 ? "/" + user?.avatar
                 : "/profile.png"
             }`}
-  
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src="/profile.png";
+            }}
             className="account__avatar"
           ></img>
           <div className="account-name">

@@ -1,11 +1,14 @@
 import axios, { CancelTokenSource } from "axios";
 import { FC, memo, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions, dataAction, RootState } from "../store";
-import { Tweet } from "../util/ts";
+import { authActions, dataActions, RootState } from "../store";
+import { Tweet } from "../util/types";
 
 const count = 150;
+let mounted=false;
 const TweetForm: FC<{ close?: any }> = ({ close }) => {
+  const source = axios.CancelToken.source();
+
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -25,17 +28,23 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
   const { token, user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
+    mounted=true;
+    return () => {
+      source.cancel("Cancelling in cleanup");
+      mounted=false;
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
     let l = 0;
     for (let index = 0; index < imgs.length; index++) {
       l += imgs[index].percentCompleted;
     }
 
-    let v =   l / imgs.length;
-    if(v===100)
-    v=0;
+    let v = l / imgs.length;
+    if (v === 100) v = 0;
     setProgress(v);
- 
-    
   }, [imgs]);
 
   const onAddImg = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +61,7 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
       setErr("Max size of image is 2mb.");
       return;
     }
-    const source = axios.CancelToken.source();
+
     const id = imgs.length;
     setImgs((prevImgs) => [
       ...prevImgs,
@@ -86,12 +95,16 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
         return [...prevImgs];
       });
     } catch (error: any) {
-      if (error?.response?.status === 401)
-        return dispatch(authActions.setToken(null));
-      setImgs((prevImgs) => {
-        prevImgs.splice(id, 1);
-        return [...prevImgs];
-      });
+      if (!axios.isCancel(error)) {
+        if (error.response?.status === 401)
+          dispatch(authActions.setToken(null));
+
+        console.log("req is canceled", error);
+        setImgs((prevImgs) => {
+          prevImgs.splice(id, 1);
+          return [...prevImgs];
+        });
+      }
     }
   };
 
@@ -103,7 +116,7 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
     imgs.forEach((img) => {
       if (img.path) imgsPaths.push(img.path);
     });
- 
+
     try {
       const res = await axios.post(
         "/tweets",
@@ -115,6 +128,7 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
           headers: {
             Authorization: "Bearer " + token,
           },
+          cancelToken: source.token,
         }
       );
       setErr("");
@@ -125,14 +139,15 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
       tweet.likesCount = 0;
       tweet.repliesCount = 0;
       tweet.userRef = user?._id || "";
-      dispatch(dataAction.addTweet({ tweet: tweet }));
-      close();
+      dispatch(dataActions.addTweet(tweet));
+     mounted&& close();
     } catch (error: any) {
-   
-      if (error?.response?.status === 401) {
-        return dispatch(authActions.setToken(null));
+      if (!axios.isCancel(error)) {
+        if (error.response?.status === 401)
+          dispatch(authActions.setToken(null));
+
+        setLoading(false);
       }
-      setLoading(false);
     }
   };
 
@@ -140,7 +155,7 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
     <>
       <div
         style={{
-          width: progress===100?0:progress+"vw",
+          width: progress === 100 ? 0 : progress + "vw",
           height: "2%",
           backgroundColor: "blue",
           position: "fixed",
@@ -154,11 +169,14 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
           {count - text.trim().length + "/" + count}
         </span>
         <div className="tweet-form__body">
-          <img alt="avatar"  src={`${
-              user?.avatar
-                ? "/" + user?.avatar
-                : "/profile.png"
-            }`}></img>
+          <img
+            alt="avatar"
+            src={`${user?.avatar ? "/" + user?.avatar : "/profile.png"}`}
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src="/profile.png";
+            }}
+          ></img>
           <textarea
             value={text}
             onChange={(e) => {
@@ -231,10 +249,9 @@ const TweetForm: FC<{ close?: any }> = ({ close }) => {
           </div>
           <button
             className={`btn ${
-              
               loading ||
               !text.trim() ||
-              imgs.find((img) => img.percentCompleted !== 100)||
+              imgs.find((img) => img.percentCompleted !== 100) ||
               imgs.find((img) => img.path === undefined)
                 ? "disable-btn"
                 : ""
@@ -269,11 +286,13 @@ const Imgs: FC<{
         )}
         {imgs.length === 2 && (
           <>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r1-c1-t2"
               src={URL.createObjectURL(imgs[0].value)}
             ></img>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r1-c2-t2"
               src={URL.createObjectURL(imgs[1].value)}
             ></img>
@@ -281,15 +300,18 @@ const Imgs: FC<{
         )}
         {imgs.length === 3 && (
           <>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r1-c1-t3"
               src={URL.createObjectURL(imgs[0].value)}
             ></img>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r1-c2-t3"
               src={URL.createObjectURL(imgs[1].value)}
             ></img>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r2-t3"
               src={URL.createObjectURL(imgs[2].value)}
             ></img>
@@ -297,20 +319,24 @@ const Imgs: FC<{
         )}
         {imgs.length === 4 && (
           <>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r1-c1-t4"
               src={URL.createObjectURL(imgs[0].value)}
             ></img>
 
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r1-c2-t4"
               src={URL.createObjectURL(imgs[1].value)}
             ></img>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r2-c1-t4"
               src={URL.createObjectURL(imgs[2].value)}
             ></img>
-            <img alt="img"
+            <img
+              alt="img"
               className="img-r2-c2-t4"
               src={URL.createObjectURL(imgs[3].value)}
             ></img>

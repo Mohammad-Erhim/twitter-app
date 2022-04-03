@@ -4,22 +4,23 @@ import TweetForm from "../components/TweetForm";
 import Tweet from "../components/Tweet";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions, dataAction, RootState } from "../store";
- 
+import { RootState } from "../store";
+
 import Spinner from "../components/Spinner";
+import { getTweets } from "../store/customActions/getTweetsAction";
+import { searchTweets } from "../store/customActions/searchTweetsAction";
 let page = 1;
 
 const Home: FC = () => {
-  const { token } = useSelector((state: RootState) => state.auth);
   const search = useSelector((state: RootState) => state.app.search);
   const tweets = useSelector((state: RootState) =>
     state.data.tweets.filter((tweet) => tweet.text.includes(search))
   );
+  const loading = useSelector(
+    (state: RootState) => state.app.homeTweetsData.loading
+  );
 
-  const [loading, setLoading] = useState(false);
   const [update, setUpdate] = useState(0);
-
- 
 
   const dispatch = useDispatch();
 
@@ -34,7 +35,7 @@ const Home: FC = () => {
     const wrappedElement: HTMLElement | null =
       document.getElementById("scroll");
     if (isBottom(wrappedElement)) {
-setUpdate(Math.random());
+      setUpdate(Math.random());
     }
   };
 
@@ -43,56 +44,21 @@ setUpdate(Math.random());
     return () => document.removeEventListener("scroll", trackScrolling);
   }, [trackScrolling]);
 
-
-  useEffect(()=>{
- page = 1;
-  },[search])
-
   useEffect(() => {
-    let unmounted = false;
     let source = axios.CancelToken.source();
-   let prevent=false;
-    (async () => {
-      if(prevent)return
-      prevent=true;
+    dispatch(searchTweets(page, search, source));
+    page = 1;
 
-      setLoading(true);
-      try {
-        const res = await axios.get(
-          "/tweets?page=" + page + "&search=" + search,
-          {
-            headers: {
-              Authorization: "Bearer " + token,
-            },
-
-            cancelToken: source.token,
-          }
-        );
-
-        ++page;
-        
-        dispatch(dataAction.addTweets({ tweets: res.data.tweets }));
-        if (!unmounted) {
-          setLoading(false);
-        }
-        prevent=false;
-      } catch (error: any) {
-        if (error?.response?.status === 401)
-          dispatch(authActions.setToken(null));
-
-        if (!unmounted) {
-          setLoading(false);
-
-          setLoading(false);
-        }
-        prevent=false;
-      }
-    })();
     return () => {
-      unmounted = true;
       source.cancel("Cancelling in cleanup");
     };
-  }, [search,update,dispatch,token]);
+  }, [search, dispatch]);
+
+  useEffect(() => {
+    let source = axios.CancelToken.source();
+    dispatch(getTweets(page, source));
+    ++page;
+  }, [update, dispatch]);
 
   return (
     <>

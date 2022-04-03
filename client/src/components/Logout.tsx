@@ -1,44 +1,43 @@
 import axios from "axios";
-import { FC, useState } from "react";
+import { FC, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions, RootState } from "../store";
+import { RootState } from "../store";
+import { logoutAction } from "../store/customActions/logoutAction";
 
 const Logout: FC = () => {
-  const [loading, setLoading] = useState(false);
+  const source = axios.CancelToken.source();
   const dispatch = useDispatch();
-  const { token } = useSelector((state: RootState) => state.auth);
-  const { user} = useSelector((state: RootState) => state.auth);
- 
-  const logout = async () => {
-    try {
-      setLoading(true);
-       await axios.post(
-        "/logout",
-        {},
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
-      dispatch(authActions.setToken(null));
-      dispatch(authActions.setUser(null));
-    } catch (error: any) {
-      if (error?.response?.status === 401)
-         { dispatch(authActions.setToken(null));dispatch(authActions.setUser(null));
-         }
-      setLoading(false);
-    } finally {
-    }
+
+  const { user } = useSelector((state: RootState) => state.auth);
+  const loading = useSelector((state: RootState) => state.app.logout).loading;
+
+  const logout = () => {
+    dispatch(logoutAction(source));
   };
+  useEffect(() => {
+    return () => {
+      source.cancel("Cancelling in cleanup");
+    };
+    // eslint-disable-next-line 
+  }, [dispatch]);
   return (
     <div className="log-out">
       <div className="account">
-        <img alt="img" src={`/${user?.avatar}`} className="account__avatar"></img>
+        <img
+          alt="img"
+          src={`/${user?.avatar}`}
+          className="account__avatar"
+          onError={({ currentTarget }) => {
+            currentTarget.onerror = null; // prevents looping
+            currentTarget.src="/profile.png";
+          }}
+        ></img>
         <div className="account-name">
-        <span className="account-name--primary">{user?.name}</span>
-                <span className="account-name--secondary">{user?.name+''+user?._id.substr(0,5)}</span>
-     </div>
+          <span className="account-name--primary">{user?.name}</span>
+          <span className="account-name--secondary">
+            {user?.name + "" + user?._id.substr(0, 5)}
+          </span>
+        </div>
       </div>
 
       <button

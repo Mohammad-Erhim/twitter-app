@@ -1,94 +1,68 @@
 import "./sass/main.scss";
 import { Redirect, Route, Switch } from "react-router-dom";
-import { FC } from "react";
-import MainLayout from "./layouts/MainLayout";
-import Home from "./pages/Home";
-import Tweet from "./pages/Tweet";
+
 import Login from "./pages/Login";
+import { useSelector } from "react-redux";
+import { RootState } from "./store";
 import Signup from "./pages/Signup";
 import Reset from "./pages/Reset";
+import UpdatePassword from "./pages/UpdatePassword";
+import Home from "./pages/Home";
+import MainLayout from "./layouts/MainLayout";
 import Profile from "./pages/Profile";
-import UpdatePassword from "./components/UpdatePassword";
+import Tweet from "./pages/Tweet";
 
-import {  useSelector } from "react-redux";
-import {  RootState } from "./store";
+const App = () => {
+  const token = useSelector((state: RootState) => state.auth).token;
 
- 
-const App: FC = () => {
-  const { token } = useSelector((state: RootState) => state.auth);
- 
-  
   return (
-    <> 
- 
-    <Switch>
-      <Route path="/" exact>
-        <Redirect to="/home" />
-      </Route>
+    <>
+      {token ? (
+        <Switch>
+          <Route path="/" exact>
+            <Redirect to="/home" />
+          </Route>
 
-      <Route path="/home" exact>
-        <PrivateRoute token={token} auth={true}>
-          <MainLayout>
-            <Home />
-          </MainLayout>
-        </PrivateRoute>
-      </Route>
+          <Route path="/home" exact>
+            <MainLayout>
+              <Home />
+            </MainLayout>
+          </Route>
 
-      <Route path="/tweet/:id" exact>
-        <PrivateRoute token={token} auth={true}>
+          <Route path="/tweet/:id" exact>
           <MainLayout>
-            {" "}
-           <Tweet/>
-           
-          </MainLayout>{" "}
-        </PrivateRoute>
-      </Route>
-      <Route path="/profile/:id" exact>
-        <PrivateRoute token={token} auth={true}>
+            <Tweet/></MainLayout>
+          </Route>
+          <Route path="/profile/:id" exact>
           <MainLayout>
-           <Profile/>
-          </MainLayout>
-        </PrivateRoute>
-      </Route>
+            <Profile/></MainLayout>
+          </Route>
 
-      <Route path="/login" exact>
-        <PrivateRoute token={token} auth={false}>
-          <Login />
-        </PrivateRoute>
-      </Route>
-      <Route path="/signup" exact>
-        <PrivateRoute token={token} auth={false}>
-          <Signup />
-        </PrivateRoute>
-      </Route>
-      <Route path="/reset" exact>
-        <PrivateRoute token={token} auth={false}>
-          <Reset />
-        </PrivateRoute>
-      </Route>
-      <Route path="/update-password/:recoveryToken" exact>
-        <PrivateRoute token={token} auth={false}>
-          <UpdatePassword />
-        </PrivateRoute>
-      </Route>
-      <Route path="*">not found</Route>
-    </Switch>
+          <Route path="*">
+            <Redirect to="/home" />
+          </Route>
+        </Switch>
+      ) : (
+        <Switch>
+          <Route path="/login" exact>
+            <Login />
+          </Route>
+          <Route path="/signup" exact>
+            <Signup />
+          </Route>
+          <Route path="/reset" exact>
+            <Reset />
+          </Route>
+          <Route path="/update-password/:recoveryToken" exact>
+            <UpdatePassword />
+          </Route>
+          <Route path="*">
+            <Redirect to="/login" />
+          </Route>
+        </Switch>
+      )}
     </>
   );
 };
 
 export default App;
-
-const PrivateRoute = ({
-  token,
-  children,
-  auth,
-}: {
-  token: string | null;
-  children: any;
-  auth: boolean;
-}) => {
-  if (auth) return token ? children : <Redirect to="/login" />;
-
-  return !token ? children : <Redirect to="/home" />;
-};

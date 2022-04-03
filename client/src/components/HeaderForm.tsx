@@ -1,7 +1,7 @@
 import axios, { CancelTokenSource } from "axios";
 import { FC, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions, dataAction, RootState } from "../store";
+import { authActions, dataActions, RootState } from "../store";
 
 const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -160,7 +160,7 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
       setLoading(false);
  
       dispatch(authActions.setUser(res.data.user));
-      dispatch(dataAction.updateUser({user:res.data.user}));
+      dispatch(dataActions.updateUser( res.data.user));
       close();
     } catch (error: any) {
    
@@ -213,6 +213,10 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
             alt="img"
               src={cover?.value?URL.createObjectURL(cover?.value):`/${user?.cover}`}
               className="header-view__cover"
+              onError={({ currentTarget }) => {
+                currentTarget.onerror = null; // prevents looping
+                currentTarget.src="/profile.png";
+              }}
             ></img>
           </div>
           <div className="header-view__account">
@@ -235,6 +239,10 @@ const HeaderForm: FC<{ close: () => void }> = ({ close }) => {
                 alt="img"
                 className="account-avatar"
                 src={avatar?.value?URL.createObjectURL(avatar?.value):`/${user?.avatar}`}
+                onError={({ currentTarget }) => {
+                  currentTarget.onerror = null; // prevents looping
+                  currentTarget.src="/profile.png";
+                }}
               ></img>
             </div>{" "}
             <div className="account-name">

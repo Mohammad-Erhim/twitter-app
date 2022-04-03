@@ -1,50 +1,37 @@
 import axios from "axios";
-import { FC, useState } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
+import { appActions, RootState } from "../store";
+import { signupAction } from "../store/customActions/signupAction";
+import { Inputs } from "../util/types";
 
-enum Inputs {
-  Name,
-  Email,
-  Password,
-  ConfirmPassword,
-}
 
-interface Err {
-  location: string;
-  msg: string;
-  param: string;
-  value: string;
-}
 const Signup: FC = () => {
+  const source = axios.CancelToken.source();
   const history = useHistory();
+  const dispatch = useDispatch();
+
+  const {errs,loading} = useSelector((state: RootState) => state.app.signup);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [foucs, setFoucs] = useState<Inputs|null>(null);
-  const [errs, setErrs] = useState<Err[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (e: any) => {
+  useEffect(() => {
+    return () => {
+      source.cancel("Cancelling in cleanup");
+      dispatch(appActions.setSignupErrs([]));
+    };
+    // eslint-disable-next-line 
+  }, [dispatch]);
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    try {
-      setLoading(true);
-      await axios.post("/signup", {
-        name,
-        email,
-        password,
-        confirmPassword,
-      });
-      history.push("/login");
-    } catch (error: any) {
-      if (error?.response?.status === 400) {
-        setErrs(error.response.data.data);
-      }
-      setLoading(false);
-    }
+   
+    dispatch(signupAction(name,email, password,confirmPassword, source,()=>history.push('/login')));
   };
   return (
     <form className="form init-animation" onSubmit={onSubmit}>

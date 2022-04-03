@@ -1,9 +1,5 @@
  
-import { FC } from "react";
-import SignupC from "../components/Signup";
-const Signup: FC = () => {
-
-  return <SignupC />;
-};
-
+ 
+import Signup from "../components/Signup";
+ 
 export default Signup;

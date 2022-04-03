@@ -5,97 +5,50 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Link } from "react-router-dom";
 import PopUpLayout from "../layouts/PopUpLayout";
-import { authActions, dataAction, RootState } from "../store";
-import { Tweet } from "../util/ts";
+import {   RootState } from "../store";
+import { getUserAction } from "../store/customActions/getUserAction";
+import { disLikeAction, likeAction } from "../store/customActions/likeActions";
+import { removeTweetAction } from "../store/customActions/removeTweetAction";
+import { Tweet } from "../util/types";
  
 import ReplyForm from "./ReplyForm";
 import { OutsideAlerter } from "./VNav";
  
 const TweetC: FC<{ tweet: Tweet }> = ({ tweet }) => {
-  const { user, token } = useSelector((state: RootState) => state.auth);
+  const source = axios.CancelToken.source();
+
+  const { user } = useSelector((state: RootState) => state.auth);
   const profile = useSelector((state: RootState) => state.data.users.find(user=>user._id===tweet.userRef));
+ 
+  const [loading,setLoading]=useState(false);
+
   const dispatch = useDispatch();
   const history = useHistory();
-  const [loading, setLoading] = useState(false);
+ 
   const [popUpReplyForm, setPopUpReplyForm] = useState(false);
   const [popUpMore, setPopUpMore] = useState(false);
 
   useEffect(()=>{
    
-    (async () => {
-      if (!profile) {
-        const res = await axios.get("/users/" + tweet.userRef, {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        });
-        dispatch(dataAction.addUser({user:res.data.user}));
-      }
-    })();
     
-  },[dispatch,profile,token,tweet.userRef])
-
+      if (!profile) 
+        dispatch(getUserAction(tweet._id,source));
+    
+        return () => {
+          source.cancel("Cancelling in cleanup");
+          
+        };
+        // eslint-disable-next-line 
+  },[])
+ 
   const like = async () => {
-    setLoading(true);
-    try {
-     await axios.post(
-        "/tweets/" + tweet._id + "/likes",
-        {},
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
-      dispatch(dataAction.like({tweetId:tweet._id}));
-
-      setLoading(false);
-    } catch (error: any) {
-      if (error?.response?.status === 401)
-        return dispatch(authActions.setToken(null));
-      setLoading(false);
-    }
+     dispatch(likeAction(tweet._id,source,()=>setLoading(true),()=>{setLoading(false)}));
   };
   const disLike = async () => {
-    setLoading(true);
-    try {
-    await axios.delete(
-        "/tweets/" + tweet._id + "/likes",
-
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
-      dispatch(dataAction.disLike({tweetId:tweet._id}));
-      setLoading(false);
-    } catch (error: any) {
-      if (error?.response?.status === 401)
-        return dispatch(authActions.setToken(null));
-      setLoading(false);
-    }
-  };
+    dispatch(disLikeAction(tweet._id,source,()=>setLoading(true),()=>{setLoading(false)}));
+ }; 
   const remove = async () => {
-    setLoading(true);
-    try {
-      await axios.delete(
-        "/tweets/" + tweet._id,
-
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      );     
-      setLoading(false);
-      dispatch(dataAction.deleteTweet({tweetId:tweet._id}));
- 
-    } catch (error: any) {
-      if (error?.response?.status === 401)
-        return dispatch(authActions.setToken(null));
-      setLoading(false);
-    }
+  dispatch(removeTweetAction(tweet._id,source,()=>setLoading(true),()=>{setLoading(false)}));
   };
   
  
@@ -117,6 +70,10 @@ const TweetC: FC<{ tweet: Tweet }> = ({ tweet }) => {
                 ? "/" + profile?.avatar
                 : "/profile.png"
             }`}
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src="/profile.png";
+            }}
           ></img>
           <div className="account-name">
             <span className="account-name--primary">{profile?.name}</span>
@@ -165,7 +122,12 @@ const TweetC: FC<{ tweet: Tweet }> = ({ tweet }) => {
         {tweet.images.length > 0 && (
           <div className="tweet-imgs">
             {tweet.images.length === 1 && (
-              <img alt="img" src={`/${tweet.images[0]}`}></img>
+              <img alt="img" src={`/${tweet.images[0]}`} 
+              onError={({ currentTarget }) => {
+                currentTarget.onerror = null; // prevents looping
+                currentTarget.src="/profile.png";
+              }}
+              ></img>
             )}
             {tweet.images.length === 2 && (
               <>

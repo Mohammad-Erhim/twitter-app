@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Reply, Tweet, User } from "../util/ts";
+import { Reply, Tweet, User } from "../util/types";
 
 
 
@@ -13,33 +13,33 @@ const dataSlice = createSlice({
   name: "data",
   initialState: initialState,
   reducers: {
-    addTweet(state, action: { payload: {tweet:Tweet} }) {
-      state.tweets =filteredArr( [action.payload.tweet, ...state.tweets]);
+    addTweet(state, action: { payload:  Tweet  }) {
+      state.tweets = filteredArr([action.payload, ...state.tweets]);
     },
-    incReply(state, action: { payload: {tweetId:string} }) {
+    incReply(state, action: { payload: { tweetId: string } }) {
       state.tweets = state.tweets.filter(tweet => {
         if (tweet._id === action.payload.tweetId) {
-     
+
           tweet.repliesCount = ++tweet.repliesCount;
         }
         return tweet;
 
       });
     },
-   decReply(state, action: { payload: {tweetId:string} }) {
+    decReply(state, action: { payload: { tweetId: string } }) {
       state.tweets = state.tweets.filter(tweet => {
         if (tweet._id === action.payload.tweetId) {
-     
+
           tweet.repliesCount = --tweet.repliesCount;
         }
         return tweet;
 
       });
     },
-    addTweets(state, action: { payload: {tweets:Tweet[] }}) {
-      state.tweets = filteredArr([...state.tweets, ...action.payload.tweets]);
+    addTweets(state, action: { payload:  Tweet[]  }) {
+      state.tweets = filteredArr([...state.tweets, ...action.payload]);
     },
-    like(state, action: { payload: {tweetId:string} }) {
+    like(state, action: { payload: { tweetId: string } }) {
       state.tweets = state.tweets.filter(tweet => {
         if (tweet._id === action.payload.tweetId) {
           tweet.liked = true;
@@ -49,7 +49,7 @@ const dataSlice = createSlice({
 
       });
     },
-    disLike(state, action: { payload: {tweetId:string} }) {
+    disLike(state, action: { payload: { tweetId: string } }) {
 
       state.tweets = state.tweets.filter(tweet => {
         if (tweet._id === action.payload.tweetId) {
@@ -61,42 +61,43 @@ const dataSlice = createSlice({
         return tweet;
 
       });
-    }, addReply(state, action: { payload: { reply: Reply } }) {
+    }, addReply(state, action: { payload:  Reply  }) {
 
 
-      state.replies =[action.payload.reply, ...state.replies];
+      state.replies = [action.payload, ...state.replies];
 
     },
     addReplies(state, action: { payload: { replies: Reply[] } }) {
 
-      state.replies = filteredArr ([...state.replies, ...action.payload.replies]);
+      state.replies = filteredArr([...state.replies, ...action.payload.replies]);
     },
 
-    deleteTweet(state, action: { payload: {tweetId:string} }) {
+    deleteTweet(state, action: { payload: { tweetId: string } }) {
 
       state.tweets = state.tweets.filter(tweet => {
         if (tweet._id !== action.payload.tweetId)
           return tweet;
-          return undefined
+        return undefined
       });
     },
+
     deleteReply(state, action: { payload: { replyId: string } }) {
 
       state.replies = state.replies.filter(reply => {
         if (reply._id !== action.payload.replyId)
           return reply;
-          return undefined
+        return undefined;
       });
     },
-    addUser(state, action: { payload: {user:User} }) {
-      state.users =filteredArr ([action.payload.user, ...state.users]);
+    addUser(state, action: { payload: { user: User } }) {
+      state.users = filteredArr([action.payload.user, ...state.users]);
     },
-    addUsers(state, action: { payload: {users:User[] }}) {
-      state.users = filteredArr([...state.users, ...action.payload.users]);
+    addUsers(state, action: { payload:  User[]  }) {
+      state.users = filteredArr([...state.users, ...action.payload]);
     },
-    updateUser(state, action: { payload: {user:User} }) {
- 
-      state.users = filteredArr([...state.users, action.payload.user]);
+    updateUser(state, action: { payload: User  }) {
+
+      state.users = filteredArr([...state.users, action.payload]);
     },
 
   },

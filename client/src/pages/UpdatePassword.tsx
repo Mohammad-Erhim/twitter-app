@@ -1,11 +1,5 @@
  
-import { FC } from "react";
+import UpdatePassword from "../components/UpdatePassword";
  
-import UpdatePasswordC from "../components/UpdatePassword";
  
-const Reset: FC = () => {
-
-  return <UpdatePasswordC />;
-};
-
-export default Reset;
+export default UpdatePassword;

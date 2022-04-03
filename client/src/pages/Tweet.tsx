@@ -3,14 +3,14 @@ import { FC, useEffect, useState } from "react";
 import Tweet from "../components/Tweet";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions, dataAction, RootState } from "../store";
+import { authActions, dataActions, RootState } from "../store";
 import { useParams } from "react-router";
 import Reply from "../components/Reply";
  
 import Spinner from "../components/Spinner";
 let page = 1;
 
-const Home: FC = () => {
+const TweetC :FC = () => {
   const { token } = useSelector((state: RootState) => state.auth);
   const { id } = useParams<{ id: string }>();
   const tweet = useSelector((state: RootState) => state.data).tweets.find(
@@ -32,7 +32,7 @@ const Home: FC = () => {
             Authorization: "Bearer " + token,
           },
         });
-        dispatch(dataAction.addTweet({ tweet: res.data.tweet }));
+        dispatch(dataActions.addTweet( res.data.tweet ));
       } catch (error: any) {
         if (error?.response?.status === 401)
           dispatch(authActions.setToken(null));
@@ -54,7 +54,7 @@ page=1;
           }
         );
   
-        dispatch(dataAction.addReplies({ replies: res.data.replies }));
+        dispatch(dataActions.addReplies({ replies: res.data.replies }));
         setLoading(false);
      
       } catch (error: any) {
@@ -100,4 +100,4 @@ page=1;
   
   );
 };
-export default Home;
+export default TweetC;

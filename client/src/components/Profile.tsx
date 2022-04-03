@@ -59,7 +59,7 @@ const Profile: FC = () => {
             Authorization: "Bearer " + token,
           },
         });
-        dispatch(dataActions.addUser( {user: res.data.user} ));
+        dispatch(dataActions.addUser({ user: res.data.user }));
       }
     
     })();
@@ -82,7 +82,7 @@ const Profile: FC = () => {
       );
       
       page++;
-      dispatch(dataActions.addTweets( res.data.tweets ));
+      dispatch(dataActions.addTweets( res.data.tweets  ));
       setLoading(false);
       wait = false;
     } catch (error: any) {

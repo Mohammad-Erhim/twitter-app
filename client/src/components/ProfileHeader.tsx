@@ -5,7 +5,7 @@ import {  useSelector } from "react-redux";
  
 import PopUpLayout from "../layouts/PopUpLayout";
 import {  RootState } from "../store";
-import { User } from "../util/ts";
+import { User } from "../util/types";
  
 import HeaderForm from "./HeaderForm";
 
@@ -19,6 +19,10 @@ const ProfileHeader: FC<{ profile: User   }> = ({ profile }) => {
       alt="img"
         src={`/${profile.cover}`}
         className="profile-header__cover"
+        onError={({ currentTarget }) => {
+          currentTarget.onerror = null; // prevents looping
+          currentTarget.src="/profile.png";
+        }}
       ></img>
       <div className="profile-header__account">
         <img
@@ -26,6 +30,10 @@ const ProfileHeader: FC<{ profile: User   }> = ({ profile }) => {
           className="account-avatar"
           src={`/${profile.avatar}`}
           alt="img"
+          onError={({ currentTarget }) => {
+            currentTarget.onerror = null; // prevents looping
+            currentTarget.src="/profile.png";
+          }}
         ></img>
         <div className="account-name">
           <span className="account-name--primary">{profile?.name}</span>

@@ -1,47 +1,47 @@
 import axios from "axios";
-import { FC, useState } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router";
-enum Inputs {
-  Name,
-  Email,
-  Password,
-  ConfirmPassword,
-}
+import { appActions, RootState } from "../store";
+import { updatePasswordAction } from "../store/customActions/updatePasswordAction";
+import { Inputs } from "../util/types";
 
-interface Err {
-  location: string;
-  msg: string;
-  param: string;
-  value: string;
-}
 const UpdatePassword: FC = () => {
+  const source = axios.CancelToken.source();
   const history = useHistory();
-  const {recoveryToken}=useParams<{recoveryToken:string}>();
+  const dispatch = useDispatch();
+
+  const { recoveryToken } = useParams<{ recoveryToken: string }>();
+
+  const { errs, loading } = useSelector(
+    (state: RootState) => state.app.updatePassword
+  );
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [foucs, setFoucs] = useState<Inputs | null>(null);
-  const [errs, setErrs] = useState<Err[]>([]);
-  const [loading, setLoading] = useState(false);
 
-
-  const onSubmit = async (e: any) => {
+  useEffect(() => {
+    return () => {
+      source.cancel("Cancelling in cleanup");
+      dispatch(appActions.setUpdatePasswordErrs([]));
+    };
+    // eslint-disable-next-line 
+  }, [dispatch]);
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      setLoading(true);
-      await axios.post("/password/set/"+recoveryToken, {
+    dispatch(
+      updatePasswordAction(
         password,
         confirmPassword,
-      });
-      history.push("/login");
-    } catch (error: any) {
-      if (error?.response?.status === 400) {
-        setErrs(error.response.data.data);
-      }
-      setLoading(false);
-    }
+        recoveryToken,
+        source,
+        () => history.push("/login")
+      )
+    );
   };
+
   return (
     <form className="form" onSubmit={onSubmit}>
       <svg
@@ -74,7 +74,9 @@ const UpdatePassword: FC = () => {
       <div
         className={`form__input ${
           foucs === Inputs.ConfirmPassword || confirmPassword ? "focus" : ""
-        } ${errs.find((e) => e.param === "confirmPassword")?.param ? "err" : ""}`}
+        } ${
+          errs.find((e) => e.param === "confirmPassword")?.param ? "err" : ""
+        }`}
       >
         <input
           type="password"

@@ -1,49 +1,37 @@
 import axios from "axios";
-import { FC, useState } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
- 
-enum Inputs {
-  Name,
-  Email,
-  Password,
-  ConfirmPassword,
-}
+import { appActions, RootState } from "../store";
+import { resetAction } from "../store/customActions/resetAction";
+import { Inputs } from "../util/types";
 
-interface Err {
-  location: string;
-  msg: string;
-  param: string;
-  value: string;
-}
 const Reset: FC = () => {
+  const source = axios.CancelToken.source();
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
- 
+  const [foucs, setFoucs] = useState<Inputs | null>(null);
 
-  const [foucs, setFoucs] = useState<Inputs|null>(null);
-  const [errs, setErrs] = useState<Err[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { errs, loading } = useSelector((state: RootState) => state.app.reset);
 
-  const onSubmit = async (e: any) => {
+  useEffect(() => {
+    return () => {
+      source.cancel("Cancelling in cleanup");
+      dispatch(appActions.setResetErrs([]));
+    };
+    // eslint-disable-next-line 
+  }, [dispatch]);
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      setLoading(true);
-      await axios.post("/password/recovery", {
-        email,
-    
-      });
-history.push('/login');
-    } catch (error: any) {
-      if (error?.response?.status === 400) {
-        setErrs(error.response.data.data);
-      }
-      setLoading(false);
-    }
+    dispatch(resetAction(email, source, () => history.push("/login")));
   };
- 
-   return (  <form onSubmit={onSubmit} className="form init-animation">
+
+  return (
+    <form onSubmit={onSubmit} className="form init-animation">
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -72,14 +60,10 @@ history.push('/login');
           {errs.find((e) => e.param === "email")?.msg}
         </span>
       </div>{" "}
-      
-     
-   
-        <button type="submit" className={`btn ${loading?'disable-btn':''}`}>
+      <button type="submit" className={`btn ${loading ? "disable-btn" : ""}`}>
         Reset
       </button>
-      </form>
- 
+    </form>
   );
 };
 export default Reset;

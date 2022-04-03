@@ -10,22 +10,24 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import authSlice from "./auth";
 
-import dataSlice from "./data";
-import searchSlice from "./app";
+import authSlice from "./auth"; 
 import appSlice from "./app";
+import dataSlice from "./data";
+
 const persistConfig = {
   key: 'root',
   storage,
   whitelist: ['auth'],
-
 };
-export const authActions = authSlice.actions;
 
-export const dataAction = dataSlice.actions;
-export const searchAction = searchSlice.actions;
-const reducers = combineReducers({ auth: authSlice.reducer, data: dataSlice.reducer, app: appSlice.reducer });
+export const authActions = authSlice.actions;
+export const appActions = appSlice.actions;
+export const dataActions = dataSlice.actions;
+
+
+
+const reducers = combineReducers({ auth: authSlice.reducer, app: appSlice.reducer, data: dataSlice.reducer });
 const persistedReducer = persistReducer(persistConfig, reducers);
 const store = configureStore({
   reducer: persistedReducer,
@@ -33,6 +35,7 @@ const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        
       },
     }),
 });

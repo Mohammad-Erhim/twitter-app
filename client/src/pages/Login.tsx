@@ -1,12 +1,4 @@
-import { FC } from "react";
-import LoginC  from '../components/Login'
-const Login: FC = () => {
-
-    
-
-  return (
-   <LoginC/>
-    );
-};
-
+ 
+import Login from "../components/Login";
+ 
 export default Login;

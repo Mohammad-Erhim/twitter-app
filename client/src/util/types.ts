@@ -34,3 +34,17 @@ export interface User{
     _v: number,
   
   }
+
+  export enum Inputs {
+    Name,
+    Email,
+    Password,
+    ConfirmPassword,
+  }
+  
+  export interface Err {
+    location: string;
+    msg: string;
+    param: string;
+    value: string;
+  }
